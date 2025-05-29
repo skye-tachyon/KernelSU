@@ -1,14 +1,12 @@
 package com.rifsxd.ksunext.ui.webui
 
-import android.app.Activity
-import android.os.Handler
-import android.os.Looper
 import android.text.TextUtils
 import android.view.Window
 import android.webkit.JavascriptInterface
 import android.widget.Toast
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.dergoogler.mmrl.platform.model.ModId.Companion.moduleDir
 import com.dergoogler.mmrl.webui.interfaces.WXInterface
 import com.dergoogler.mmrl.webui.interfaces.WXOptions
 import com.dergoogler.mmrl.webui.model.JavaScriptInterface
@@ -20,19 +18,18 @@ import com.rifsxd.ksunext.ui.util.listModules
 import com.rifsxd.ksunext.ui.util.withNewRootShell
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.File
 import java.util.concurrent.CompletableFuture
 
 class WebViewInterface(
     wxOptions: WXOptions,
 ) : WXInterface(wxOptions) {
     override var name: String = "ksu"
+    // Add logging tag for console.log
+    override var tag: String = "KernelSUInterface"
 
     companion object {
         fun factory() = JavaScriptInterface(WebViewInterface::class.java)
     }
-
-    private val modDir get() = "/data/adb/modules/${modId.id}"
 
     @JavascriptInterface
     fun exec(cmd: String): String {
@@ -171,23 +168,22 @@ class WebViewInterface(
 
     @JavascriptInterface
     fun fullScreen(enable: Boolean) {
-        if (context is Activity) {
-            Handler(Looper.getMainLooper()).post {
-                if (enable) {
-                    hideSystemUI(activity.window)
-                } else {
-                    showSystemUI(activity.window)
-                }
+         runMainLooperPost {
+            if (enable) {
+                hideSystemUI(window)
+            } else {
+                showSystemUI(window)
             }
         }
     }
 
     @JavascriptInterface
     fun moduleInfo(): String {
+        val modDir = modId.moduleDir
         val moduleInfos = JSONArray(listModules())
         val currentModuleInfo = JSONObject()
         currentModuleInfo.put("moduleDir", modDir)
-        val moduleId = File(modDir).getName()
+        val moduleId = modDir.getName()
         for (i in 0 until moduleInfos.length()) {
             val currentInfo = moduleInfos.getJSONObject(i)
 

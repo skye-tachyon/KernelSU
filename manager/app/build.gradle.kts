@@ -108,6 +108,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.swiperefreshlayout)
 
     implementation(libs.compose.destinations.core)
     ksp(libs.compose.destinations.ksp)

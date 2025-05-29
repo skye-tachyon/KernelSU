@@ -17,14 +17,15 @@ import androidx.core.view.updateLayoutParams
 import androidx.webkit.WebViewAssetLoader
 import com.dergoogler.mmrl.platform.model.ModId
 import com.dergoogler.mmrl.webui.interfaces.WXOptions
+import com.dergoogler.mmrl.webui.util.WebUIOptions
+import com.dergoogler.mmrl.webui.view.WXView
+import com.dergoogler.mmrl.webui.view.WebUIView
 import com.topjohnwu.superuser.Shell
 import com.rifsxd.ksunext.ui.util.createRootShell
 import java.io.File
 
 @SuppressLint("SetJavaScriptEnabled")
 class WebUIActivity : ComponentActivity() {
-    private lateinit var webviewInterface: WebViewInterface
-
     private var rootShell: Shell? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,7 +72,12 @@ class WebUIActivity : ComponentActivity() {
             }
         }
 
-        val webView = WebView(this).apply {
+        val options = WebUIOptions(
+            modId = ModId(moduleId),
+            context = this,
+        )
+
+        val webView = WebUIView(options).apply {
             ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
                 val inset = insets.getInsets(WindowInsetsCompat.Type.systemBars())
                 view.updateLayoutParams<MarginLayoutParams> {
@@ -82,15 +88,15 @@ class WebUIActivity : ComponentActivity() {
                 }
                 return@setOnApplyWindowInsetsListener insets
             }
+
+            val factory = WebViewInterface.factory()
+
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.allowFileAccess = false
-            webviewInterface = WebViewInterface(
-                WXOptions(this@WebUIActivity, this, ModId(moduleId))
-            )
-            addJavascriptInterface(webviewInterface, "ksu")
+            addJavascriptInterface(factory)
             setWebViewClient(webViewClient)
-            loadUrl("https://mui.kernelsu.org/index.html")
+            loadDomain()
         }
 
         setContentView(webView)

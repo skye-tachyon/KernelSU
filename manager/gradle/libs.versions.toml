@@ -17,7 +17,8 @@ parcelablelist = "2.0.1"
 libsu = "6.0.0"
 apksign = "1.4"
 cmaker = "1.2"
-mmrl = "817d76c8b5"
+mmrl = "fcb3a1fb76"
+swiperefreshlayout = "1.1.0"
 
 [plugins]
 agp-app = { id = "com.android.application", version.ref = "agp" }
@@ -35,6 +36,8 @@ lsplugin-cmaker = { id = "org.lsposed.lsplugin.cmaker", version.ref = "cmaker" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+
+androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
 
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }

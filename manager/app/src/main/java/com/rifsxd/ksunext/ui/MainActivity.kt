@@ -71,12 +71,7 @@ class MainActivity : ComponentActivity() {
         if (isManager) install()
 
         setContent {
-            // Read AMOLED mode preference
-            val prefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
-            val amoledMode = prefs.getBoolean("enable_amoled", false)
-
             KernelSUTheme (
-                amoledMode = amoledMode
             ) {
                 val navController = rememberNavController()
                 val snackBarHostState = remember { SnackbarHostState() }

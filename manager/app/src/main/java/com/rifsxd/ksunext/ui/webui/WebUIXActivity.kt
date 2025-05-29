@@ -1,32 +1,19 @@
 package com.rifsxd.ksunext.ui.webui
 
-import android.app.ActivityManager
 import android.os.Build
 import android.os.Bundle
-import android.webkit.WebView
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.dergoogler.mmrl.platform.Platform
-import com.dergoogler.mmrl.platform.model.ModId
-import com.dergoogler.mmrl.ui.component.Loading
-import com.dergoogler.mmrl.webui.screen.WebUIScreen
-import com.dergoogler.mmrl.webui.util.rememberWebUIOptions
+import com.dergoogler.mmrl.webui.activity.WXActivity
+import com.dergoogler.mmrl.webui.util.WebUIOptions
+import com.dergoogler.mmrl.webui.view.WebUIXView
 import com.rifsxd.ksunext.BuildConfig
-import com.rifsxd.ksunext.ui.theme.KernelSUTheme
-import kotlinx.coroutines.delay
+import com.rifsxd.ksunext.ui.theme.getColorScheme
+import com.rifsxd.ksunext.ui.theme.isSystemInDarkTheme
 import kotlinx.coroutines.launch
 
-class WebUIXActivity : ComponentActivity() {
-    private lateinit var webView: WebView
-
+class WebUIXActivity : WXActivity() {
     private val userAgent
         get(): String {
             val ksuVersion = BuildConfig.VERSION_CODE
@@ -45,69 +32,59 @@ class WebUIXActivity : ComponentActivity() {
             return "KernelSU Next/$ksuVersion (Linux; Android $osVersion; $deviceModel; $platform/$platformVersion)"
         }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+    override fun onRender(savedInstanceState: Bundle?) {
+        super.onRender(savedInstanceState)
 
-        webView = WebView(this)
-
-        lifecycleScope.launch {
-            initPlatform()
+        if (this.modId == null) {
+            val msg = "ModId cannot be null"
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            throw IllegalArgumentException(msg)
         }
 
-        val moduleId = intent.getStringExtra("id")!!
-        val name = intent.getStringExtra("name")!!
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            @Suppress("DEPRECATION")
-            setTaskDescription(ActivityManager.TaskDescription("KernelSU Next - $name"))
-        } else {
-            val taskDescription =
-                ActivityManager.TaskDescription.Builder().setLabel("KernelSU Next - $name").build()
-            setTaskDescription(taskDescription)
-        }
+        // Cast since we check it
+        val modId = this.modId!!
 
         val prefs = getSharedPreferences("settings", MODE_PRIVATE)
+        val webDebugging = prefs.getBoolean("enable_web_debugging", false)
+        val erudaInject = prefs.getBoolean("use_webuix_eruda", false)
 
-        setContent {
-            KernelSUTheme {
-                var isLoading by remember { mutableStateOf(true) }
 
-                LaunchedEffect(Platform.isAlive) {
-                    while (!Platform.isAlive) {
-                        delay(1000)
-                    }
+        val options = WebUIOptions(
+            modId = modId,
+            context = this,
+            debug = webDebugging,
+            appVersionCode = BuildConfig.VERSION_CODE,
+            isDarkMode = isSystemInDarkTheme(),
+            enableEruda = erudaInject,
+            cls = WebUIXActivity::class.java,
+            userAgentString = userAgent,
+            colorScheme = getColorScheme()
+        )
 
-                    isLoading = false
-                }
+        val view = WebUIXView(options).apply {
+            wx.addJavascriptInterface(WebViewInterface.factory())
+            wx.loadDomain()
+        }
 
-                if (isLoading) {
-                    Loading()
+        this.options = options
+        this.view = view
 
-                    return@KernelSUTheme
-                }
 
-                val webDebugging = prefs.getBoolean("enable_web_debugging", false)
-                val erudaInject = prefs.getBoolean("use_webuix_eruda", false)
-                val dark = isSystemInDarkTheme()
+        // Ensure type safety
+        val name = intent.getStringExtra("name")
+        if (name != null) {
+            setActivityTitle("KernelSU Next - $name")
+        }
 
-                val options = rememberWebUIOptions(
-                    modId = ModId(moduleId),
-                    debug = webDebugging,
-                    appVersionCode = BuildConfig.VERSION_CODE,
-                    isDarkMode = dark,
-                    enableEruda = erudaInject,
-                    cls = WebUIXActivity::class.java,
-                    userAgentString = userAgent
-                )
+        val loading = createLoadingRenderer()
+        setContentView(loading)
 
-                WebUIScreen(
-                    webView = webView,
-                    options = options,
-                    interfaces = listOf(
-                        WebViewInterface.factory()
-                    )
-                )
+        lifecycleScope.launch {
+            val deferred = Platform.getAsyncDeferred(this, null) {
+                view
             }
+
+            setContentView(deferred.await())
         }
     }
 }

@@ -1,20 +1,19 @@
 package com.rifsxd.ksunext.ui.theme
 
+import android.content.Context
+import android.content.res.Configuration
+import android.content.res.Resources
 import android.os.Build
-import androidx.activity.SystemBarStyle
-import androidx.activity.ComponentActivity
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import com.dergoogler.mmrl.ui.component.StatusBarStyle
 
 private val DarkColorScheme = darkColorScheme(
     primary = PRIMARY,
@@ -38,38 +37,58 @@ fun Color.blend(other: Color, ratio: Float): Color {
     )
 }
 
-@Composable
-fun KernelSUTheme(
+/**
+ * AMOLED colors are handled through the context
+ */
+fun Context.getColorScheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+): ColorScheme {
+    // Read AMOLED mode preference
+    val prefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
+    val amoledMode = prefs.getBoolean("enable_amoled", false)
+
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
-    amoledMode: Boolean = false,
-    content: @Composable () -> Unit
-) {
-    val colorScheme = when {
+    val dynamicColor = true
+
+    return when {
         amoledMode && darkTheme && dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            val dynamicScheme = dynamicDarkColorScheme(context)
+            val dynamicScheme = dynamicDarkColorScheme(this)
             dynamicScheme.copy(
                 background = AMOLED_BLACK,
                 surface = AMOLED_BLACK,
                 surfaceVariant = dynamicScheme.surfaceVariant.blend(AMOLED_BLACK, 0.6f),
                 surfaceContainer = dynamicScheme.surfaceContainer.blend(AMOLED_BLACK, 0.6f),
                 surfaceContainerLow = dynamicScheme.surfaceContainerLow.blend(AMOLED_BLACK, 0.6f),
-                surfaceContainerLowest = dynamicScheme.surfaceContainerLowest.blend(AMOLED_BLACK, 0.6f),
+                surfaceContainerLowest = dynamicScheme.surfaceContainerLowest.blend(
+                    AMOLED_BLACK,
+                    0.6f
+                ),
                 surfaceContainerHigh = dynamicScheme.surfaceContainerHigh.blend(AMOLED_BLACK, 0.6f),
-                surfaceContainerHighest = dynamicScheme.surfaceContainerHighest.blend(AMOLED_BLACK, 0.6f),
+                surfaceContainerHighest = dynamicScheme.surfaceContainerHighest.blend(
+                    AMOLED_BLACK,
+                    0.6f
+                ),
             )
         }
+
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (darkTheme) dynamicDarkColorScheme(this) else dynamicLightColorScheme(this)
         }
+
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
+}
 
-    SystemBarStyle(
+@Composable
+fun KernelSUTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit,
+) {
+    val context = LocalContext.current
+    val colorScheme = context.getColorScheme(darkTheme)
+
+    StatusBarStyle(
         darkMode = darkTheme
     )
 
@@ -80,31 +99,7 @@ fun KernelSUTheme(
     )
 }
 
-@Composable
-private fun SystemBarStyle(
-    darkMode: Boolean,
-    statusBarScrim: Color = Color.Transparent,
-    navigationBarScrim: Color = Color.Transparent,
-) {
-    val context = LocalContext.current
-    val activity = context as ComponentActivity
-
-    SideEffect {
-        activity.enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.auto(
-                statusBarScrim.toArgb(),
-                statusBarScrim.toArgb(),
-            ) { darkMode },
-            navigationBarStyle = when {
-                darkMode -> SystemBarStyle.dark(
-                    navigationBarScrim.toArgb()
-                )
-
-                else -> SystemBarStyle.light(
-                    navigationBarScrim.toArgb(),
-                    navigationBarScrim.toArgb(),
-                )
-            }
-        )
-    }
+internal fun isSystemInDarkTheme(): Boolean {
+    val uiMode = Resources.getSystem().configuration.uiMode
+    return (uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
 }
