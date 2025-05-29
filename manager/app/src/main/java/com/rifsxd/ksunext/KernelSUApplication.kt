@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import com.rifsxd.ksunext.ui.webui.initPlatform
+import kotlinx.coroutines.DelicateCoroutinesApi
 
 lateinit var ksuApp: KernelSUApplication
 
@@ -61,6 +62,7 @@ class KernelSUApplication : Application() {
                 }.build()
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun launchPlatformInit() {
         // Use a coroutine to avoid blocking the main thread
         GlobalScope.launch(Dispatchers.IO) {
