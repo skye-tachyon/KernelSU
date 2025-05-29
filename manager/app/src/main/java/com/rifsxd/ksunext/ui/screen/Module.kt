@@ -314,28 +314,22 @@ fun ModuleScreen(navigator: DestinationsNavigator) {
                                 .putExtra("name", name)
 
                             val config = id.asModuleConfig
-
                             val engine = config.getWebuiEngine(context)
 
-                            if (engine != null) {
-                                webUILauncher.launch(
-                                    when (config.getWebuiEngine(context)) {
-                                        "wx" -> wxEngine
-                                        "ksu" -> ksuEngine
-                                        else -> wxEngine
-                                    }
-                                )
+                            val selectedEngine = when (engine) {
+                                "wx" -> wxEngine
+                                "ksu" -> ksuEngine
+                                null -> if (prefs.getBoolean(
+                                        "use_webuix",
+                                        true
+                                    ) && Platform.isAlive
+                                ) wxEngine else ksuEngine
 
-                                return@ModuleList
+                                else -> wxEngine
                             }
 
-                            webUILauncher.launch(
-                                if (prefs.getBoolean("use_webuix", true) && Platform.isAlive) {
-                                    wxEngine
-                                } else {
-                                    ksuEngine
-                                }
-                            )
+                            webUILauncher.launch(selectedEngine)
+                            return@ModuleList
                         }
                     },
                     context = context,
@@ -678,7 +672,9 @@ fun ModuleItem(
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         LabelItem(
-                            text = if (module.enabled) stringResource(R.string.enabled) else stringResource(R.string.disabled),
+                            text = if (module.enabled) stringResource(R.string.enabled) else stringResource(
+                                R.string.disabled
+                            ),
                             style = if (module.enabled)
                                 com.dergoogler.mmrl.ui.component.LabelItemDefaults.style.copy()
                             else
@@ -816,7 +812,7 @@ fun ModuleItem(
                             )
                             HorizontalDivider()
                         }
-                        
+
                         if (module.hasWebUi) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.webui)) },
@@ -837,7 +833,7 @@ fun ModuleItem(
                             )
                         }
 
-                        if (module.hasWebUi || module.hasActionScript ) {
+                        if (module.hasWebUi || module.hasActionScript) {
                             HorizontalDivider()
                         }
 
