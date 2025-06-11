@@ -89,4 +89,6 @@ bool is_su_enabled();
 
 bool is_zygisk_enabled();
 
+bool is_KPM_enable();
+
 #endif //KERNELSU_KSU_H

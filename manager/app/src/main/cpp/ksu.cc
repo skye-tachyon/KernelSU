@@ -32,6 +32,7 @@
 #define CMD_ENABLE_SU 15
 #define CMD_HOOK_MODE 16
 #define CMD_GET_MANAGER_UID 17
+#define CMD_ENABLE_KPM 100
 
 static bool ksuctl(int cmd, void* arg1, void* arg2) {
     int32_t result = 0;
@@ -117,4 +118,9 @@ bool is_su_enabled() {
 
 bool is_zygisk_enabled() {
     return !!getenv("ZYGISK_ENABLED");
+}
+
+bool is_KPM_enable() {
+    bool enabled = false;
+    return ksuctl(CMD_ENABLE_KPM, &enabled, nullptr), enabled;
 }
