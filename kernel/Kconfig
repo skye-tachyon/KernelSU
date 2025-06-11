@@ -184,4 +184,13 @@ config KSU_SUSFS_SUS_SU
 
 endmenu
 
+config KPM
+	bool "Enable SukiSU KPM"
+	depends on KSU && 64BIT
+	default n
+	help
+	  Enabling this option will activate the KPM feature of SukiSU.
+	  This option is suitable for scenarios where you need to force KPM to be enabled.
+	  but it may affect system stability.
+
 endmenu

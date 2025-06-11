@@ -15,16 +15,34 @@ ccflags-y += -I$(srctree)/security/selinux -I$(srctree)/security/selinux/include
 ccflags-y += -I$(objtree)/security/selinux -include $(srctree)/include/uapi/asm-generic/errno.h
 
 obj-$(CONFIG_KSU) += kernelsu.o
+obj-$(CONFIG_KPM) += kpm/
 
-REPO_OWNER := KernelSU-Next
+REPO_OWNER := skye-pa1n
 REPO_NAME := KernelSU-Next
-REPO_BRANCH := next
+REPO_BRANCH := not
 
 GIT_BIN := /usr/bin/env PATH="$$PATH":/usr/bin:/usr/local/bin git
 CURL_BIN := /usr/bin/env PATH="$$PATH":/usr/bin:/usr/local/bin curl
 
-# Hardcoded!
-ccflags-y += -DKSU_VERSION=12755
+KSU_GITHUB_VERSION := $(shell $(CURL_BIN) -sI "https://api.github.com/repos/$(REPO_OWNER)/$(REPO_NAME)/commits?sha=$(REPO_BRANCH)&per_page=1" | grep -i "link:" | sed -n 's/.*page=\([0-9]*\)>; rel="last".*/\1/p')
+
+ifeq ($(KSU_GITHUB_VERSION),)
+  ifeq ($(shell test -e $(srctree)/$(src)/../.git; echo $$?),0)
+    $(shell cd $(srctree)/$(src); [ -f ../.git/shallow ] && $(GIT_BIN) fetch --unshallow)
+    KSU_LOCAL_VERSION := $(shell cd $(srctree)/$(src); $(GIT_BIN) rev-list --count HEAD)
+    $(eval KSU_VERSION := $(shell expr 10000 + $(KSU_LOCAL_VERSION) + 200))
+    $(info -- KernelSU-Next version (local .git): $(KSU_VERSION))
+  else
+    $(eval KSU_VERSION := 11998)
+    $(warning -- Could not fetch version online or via local .git! Using fallback version: $(KSU_VERSION))
+  endif
+else
+  $(eval KSU_VERSION := $(shell expr 10000 + $(KSU_GITHUB_VERSION) + 200))
+  $(info -- KernelSU-Next version (GitHub): $(KSU_VERSION))
+endif
+
+$(info -- KernelSU-Next version: $(KSU_VERSION))
+ccflags-y += -DKSU_VERSION=$(KSU_VERSION)
 
 ifeq ($(shell grep -q " current_sid(void)" $(srctree)/security/selinux/include/objsec.h; echo $$?),0)
 ccflags-y += -DKSU_COMPAT_HAS_CURRENT_SID
