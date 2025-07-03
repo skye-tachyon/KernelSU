@@ -9,10 +9,6 @@ on:
         required: false
         type: string
         default: ubuntu-latest
-      pack_lkm:
-        required: false
-        type: boolean
-        default: true
       use_cache:
         required: false
         type: boolean
@@ -28,12 +24,6 @@ jobs:
 
     - name: Download Artifacts
       uses: actions/download-artifact@v4
-
-    - name: Prepare LKM Files
-      if: ${{ inputs.pack_lkm }}
-      run: |
-        cp android*-lkm/*_kernelsu.ko ./userspace/ksud_overlayfs/bin/aarch64/
-        cp android*-lkm/*_kernelsu.ko ./userspace/ksud_magic/bin/aarch64/
 
     - name: Import susfsd Libraries
       run: |
