@@ -29,9 +29,14 @@ jobs:
     with:
       os: ${{ matrix.os }}
 
-  build-susfs:
-    uses: ./.github/workflows/build-lkm.yml
-    name: Build userspace kpmmgr
+ build-kpm:
+   strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+    uses: ./.github/workflows/kpmmgr.yml
+    with:
+      os: ${{ matrix.os }}
           
   build-ksud:
     needs: build-susfsd
