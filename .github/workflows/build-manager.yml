@@ -33,17 +33,11 @@ jobs:
     with:
       os: ${{ matrix.os }}
 
-  build-kpmmgr:
-      needs: build-lkm
-      strategy:
-        matrix:
-          include:
-            - target: aarch64-linux-android
-              os: ubuntu-latest
-      uses: ./.github/workflows/kpmmgr.yml
-      with:
-        os: ${{ matrix.os }}
-
+  build-susfs:
+    uses: ./.github/workflows/build-lkm.yml
+    needs: build-lkm      
+    name: Build userspace kpmmgr
+          
   build-ksud:
     needs: build-susfsd
     strategy:
