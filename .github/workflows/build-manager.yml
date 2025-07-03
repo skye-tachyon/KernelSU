@@ -19,12 +19,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-lkm:
-    uses: ./.github/workflows/build-lkm.yml
-    secrets: inherit
 
   build-susfsd:
-    needs: build-lkm
     strategy:
       matrix:
         include:
@@ -35,7 +31,6 @@ jobs:
 
   build-susfs:
     uses: ./.github/workflows/build-lkm.yml
-    needs: build-lkm      
     name: Build userspace kpmmgr
           
   build-ksud:
