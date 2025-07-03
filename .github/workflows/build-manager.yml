@@ -19,7 +19,6 @@ on:
   workflow_dispatch:
 
 jobs:
-
   build-susfsd:
     strategy:
       matrix:
@@ -28,9 +27,9 @@ jobs:
     uses: ./.github/workflows/susfsd.yml
     with:
       os: ${{ matrix.os }}
-
- build-kpm:
-   strategy:
+ 
+  build-kpm:
+    strategy:
       matrix:
         include:
           - os: ubuntu-latest
