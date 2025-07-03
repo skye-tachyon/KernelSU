@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "mian" ]
     paths:
-      - '.github/workflows/kpmmgr.yml'
+      - './.github/workflows/kpmmgr.yml'
       - 'userspace/kpmmgr/**'
   workflow_dispatch:
   workflow_call:
