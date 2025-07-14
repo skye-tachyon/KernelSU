@@ -117,10 +117,6 @@ pr_info("susfs_is_umount_for_zygote_system_process_enabled: %d\n", susfs_is_umou
 }
 #endif // #ifdef CONFIG_KSU_SUSFS
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 0, 0) || defined(KSU_COMPAT_GET_CRED_RCU)
-#define KSU_GET_CRED_RCU
-#endif
-
 static bool ksu_module_mounted = false;
 
 extern int ksu_handle_sepolicy(unsigned long arg3, void __user *arg4);
