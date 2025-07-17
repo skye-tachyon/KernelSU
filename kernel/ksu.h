@@ -27,9 +27,6 @@
 
 #define CMD_HOOK_MODE 0xC0DEAD1A
 
-// This is used to check if the kernel supports KPM
-#define CMD_ENABLE_KPM 100
-
 #define EVENT_POST_FS_DATA 1
 #define EVENT_BOOT_COMPLETED 2
 #define EVENT_MODULE_MOUNTED 3
