@@ -1086,7 +1086,7 @@ int ksu_handle_setuid(struct cred *new, const struct cred *old)
 #ifdef CONFIG_KSU_SUSFS
 	// check if current process is zygote
 	bool is_zygote_child = susfs_is_sid_equal(old->security, susfs_zygote_sid);
-#endif // #ifdef CONFIG_KSU_SUSFS
+	
 	if (likely(is_zygote_child)) {
 		// if spawned process is non user app process
 		if (unlikely(new_uid.val < 10000 && new_uid.val >= 1000)) {
@@ -1128,7 +1128,7 @@ int ksu_handle_setuid(struct cred *new, const struct cred *old)
 		}
 	}
 #endif // #ifdef CONFIG_KSU_SUSFS
-
+#endif // #ifdef CONFIG_KSU_SUSFS
 	if (!is_appuid(new_uid) || is_unsupported_uid(new_uid.val)) {
 		// pr_info("handle setuid ignore non application or isolated uid: %d\n", new_uid.val);
 		return 0;
