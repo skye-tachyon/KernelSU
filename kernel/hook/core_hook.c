@@ -7,6 +7,33 @@ int ksu_inode_rename(struct inode *old_inode, struct dentry *old_dentry,
 
 int ksu_task_fix_setuid(struct cred *new, const struct cred *old, int flags)
 {
+	if (!new || !old)
+		return 0;
+
+	uid_t new_uid = new->uid.val;
+	uid_t old_uid = old->uid.val;
+
+	// old process is not root, ignore it.
+	if (0 != old_uid)
+		return 0;
+
+	// we dont have those new fancy things upstream has
+	// lets just do the original thing where we disable seccomp
+	if (unlikely(is_uid_manager(new_uid)))
+		goto install_ksu_fd;
+
+	if (ksu_is_allow_uid_for_current(new_uid))
+		goto kill_seccomp;
+
+	ksu_handle_umount(new, old);
+	return 0;
+
+install_ksu_fd:
+	pr_info("install fd for manager: %d\n", new_uid);
+	ksu_install_fd();
+
+kill_seccomp:
+	disable_seccomp();
 	return 0;
 }
 
