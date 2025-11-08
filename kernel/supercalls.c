@@ -354,14 +354,18 @@ static int __do_get_wrapper_fd(void __user *arg, const char *anon_name)
 		goto put_orig_file;
 	}
 
-	struct file *pf = anon_inode_getfile(anon_name, &data->ops,
-					     data, f->f_flags);
-	if (IS_ERR(pf)) {
-		ret = PTR_ERR(pf);
-		pr_err("fdwrapper: anon_inode_getfile failed: %ld\n",
-		       PTR_ERR(pf));
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 12, 0)
+#define getfd_secure anon_inode_create_getfd
+#else
+#define getfd_secure anon_inode_getfd_secure
+#endif
+
+	ret = getfd_secure(anon_name, &data->ops, data, f->f_flags, NULL);
+	if (ret < 0) {
+		pr_err("ksu_fdwrapper: getfd failed: %d\n", ret);
 		goto put_wrapper_data;
 	}
+	struct file *pf = fget(ret);
 
 	struct inode *wrapper_inode = file_inode(pf);
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 1, 0) ||                           \
@@ -375,18 +379,6 @@ static int __do_get_wrapper_fd(void __user *arg, const char *anon_name)
 		sec->sid = ksu_file_sid;
 	}
 
-	ret = get_unused_fd_flags(cmd.flags);
-	if (ret < 0) {
-		pr_err("fdwrapper: get unused fd failed: %d\n", ret);
-		goto put_wrapper_file;
-	}
-
-	// pr_info("mksu_fdwrapper: installed wrapper fd for %p %d (flags=%d, mode=%d) to %p %d (flags=%d, mode=%d)", f, cmd.fd, f->f_flags, f->f_mode, pf, ret, pf->f_flags, pf->f_mode);
-	// pf->f_mode |= FMODE_READ | FMODE_CAN_READ | FMODE_WRITE | FMODE_CAN_WRITE;
-	fd_install(ret, pf);
-	goto put_orig_file;
-
-put_wrapper_file:
 	fput(pf);
 put_wrapper_data:
 	mksu_delete_file_wrapper(data);
@@ -396,14 +388,14 @@ put_orig_file:
 	return ret;
 }
 
-static int do_get_wrapper_fd(void __user *arg)
+static int do_get_wrapper_fd_mksu(void __user *arg)
 {
 	return __do_get_wrapper_fd(arg, "[mksu_fdwrapper]");
 }
 
-static int do_proxy_file(void __user *arg)
+static int do_get_wrapper_fd(void __user *arg)
 {
-	return __do_get_wrapper_fd(arg, "[ksu_file_proxy]");
+	return __do_get_wrapper_fd(arg, "[ksu_fdwrapper]");
 }
 
 // IOCTL handlers mapping table
@@ -422,8 +414,8 @@ static const struct ksu_ioctl_cmd_map ksu_ioctl_handlers[] = {
 	KSU_IOCTL_HANDLER(KSU_IOCTL_SET_APP_PROFILE, "SET_APP_PROFILE", do_set_app_profile, only_manager),
 	KSU_IOCTL_HANDLER(KSU_IOCTL_GET_FEATURE, "GET_FEATURE", do_get_feature, manager_or_root),
 	KSU_IOCTL_HANDLER(KSU_IOCTL_SET_FEATURE, "SET_FEATURE", do_set_feature, manager_or_root),
-	KSU_IOCTL_HANDLER(KSU_IOCTL_PROXY_FILE, "PROXY_FILE", do_proxy_file, manager_or_root),
-	KSU_IOCTL_HANDLER(KSU_IOCTL_GET_WRAPPER_FD, "GET_WRAPPER_FD", do_get_wrapper_fd, manager_or_root),
+	KSU_IOCTL_HANDLER(KSU_IOCTL_PROXY_FILE, "PROXY_FILE", do_get_wrapper_fd, manager_or_root),
+	KSU_IOCTL_HANDLER(KSU_IOCTL_GET_WRAPPER_FD, "GET_WRAPPER_FD", do_get_wrapper_fd_mksu, manager_or_root),
 	KSU_IOCTL_HANDLER(0, NULL, NULL, NULL) // Sentinel
 };
 
