@@ -356,17 +356,22 @@ static int __do_get_wrapper_fd(void __user *arg, const char *anon_name)
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 12, 0)
 #define getfd_secure anon_inode_create_getfd
-#else
+#elif defined(KSU_HAS_GETFD_SECURE)
 #define getfd_secure anon_inode_getfd_secure
 #endif
 
+#ifdef KSU_HAS_GETFD_SECURE
 	ret = getfd_secure(anon_name, &data->ops, data, f->f_flags, NULL);
+#else
+	ret = anon_inode_getfd(anon_name, &data->ops, data, f->f_flags);
+#endif
+
 	if (ret < 0) {
 		pr_err("ksu_fdwrapper: getfd failed: %d\n", ret);
 		goto put_wrapper_data;
 	}
-	struct file *pf = fget(ret);
 
+	struct file *pf = fget(ret);
 	struct inode *wrapper_inode = file_inode(pf);
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 1, 0) ||                           \
 	defined(KSU_OPTIONAL_SELINUX_INODE)
