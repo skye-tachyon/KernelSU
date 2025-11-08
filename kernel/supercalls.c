@@ -385,6 +385,8 @@ static int __do_get_wrapper_fd(void __user *arg, const char *anon_name)
 	}
 
 	fput(pf);
+	goto put_orig_file;
+
 put_wrapper_data:
 	mksu_delete_file_wrapper(data);
 put_orig_file:
