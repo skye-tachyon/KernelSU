@@ -329,12 +329,13 @@ static int do_set_feature(void __user *arg)
 	return 0;
 }
 
-static int __do_get_wrapper_fd(void __user *arg, const char *anon_name)
+static int do_get_wrapper_fd(void __user *arg)
 {
 	if (!ksu_file_sid) {
 		return -1;
 	}
 
+	const char *anon_name = "[ksu_fdwrapper]";
 	struct ksu_get_wrapper_fd_cmd cmd;
 	int ret;
 
@@ -348,7 +349,7 @@ static int __do_get_wrapper_fd(void __user *arg, const char *anon_name)
 		return -EBADF;
 	}
 
-	struct ksu_file_wrapper *data = mksu_create_file_wrapper(f);
+	struct ksu_file_wrapper *data = ksu_create_file_wrapper(f);
 	if (data == NULL) {
 		ret = -ENOMEM;
 		goto put_orig_file;
@@ -388,21 +389,11 @@ static int __do_get_wrapper_fd(void __user *arg, const char *anon_name)
 	goto put_orig_file;
 
 put_wrapper_data:
-	mksu_delete_file_wrapper(data);
+	ksu_delete_file_wrapper(data);
 put_orig_file:
 	fput(f);
 
 	return ret;
-}
-
-static int do_get_wrapper_fd_mksu(void __user *arg)
-{
-	return __do_get_wrapper_fd(arg, "[mksu_fdwrapper]");
-}
-
-static int do_get_wrapper_fd(void __user *arg)
-{
-	return __do_get_wrapper_fd(arg, "[ksu_fdwrapper]");
 }
 
 // IOCTL handlers mapping table
@@ -421,8 +412,7 @@ static const struct ksu_ioctl_cmd_map ksu_ioctl_handlers[] = {
 	KSU_IOCTL_HANDLER(KSU_IOCTL_SET_APP_PROFILE, "SET_APP_PROFILE", do_set_app_profile, only_manager),
 	KSU_IOCTL_HANDLER(KSU_IOCTL_GET_FEATURE, "GET_FEATURE", do_get_feature, manager_or_root),
 	KSU_IOCTL_HANDLER(KSU_IOCTL_SET_FEATURE, "SET_FEATURE", do_set_feature, manager_or_root),
-	KSU_IOCTL_HANDLER(KSU_IOCTL_PROXY_FILE, "PROXY_FILE", do_get_wrapper_fd, manager_or_root),
-	KSU_IOCTL_HANDLER(KSU_IOCTL_GET_WRAPPER_FD, "GET_WRAPPER_FD", do_get_wrapper_fd_mksu, manager_or_root),
+	KSU_IOCTL_HANDLER(KSU_IOCTL_GET_WRAPPER_FD, "GET_WRAPPER_FD", do_get_wrapper_fd, manager_or_root),
 	KSU_IOCTL_HANDLER(0, NULL, NULL, NULL) // Sentinel
 };
 
