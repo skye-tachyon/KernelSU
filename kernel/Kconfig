@@ -18,7 +18,7 @@ config KSU_DEBUG
 config KSU_ALLOWLIST_WORKAROUND
 	bool "KernelSU Session init keyring workaround"
 	depends on KSU
-	default n
+	default y
 	help
 	  Enable session keyring init workaround for problematic devices.
 	  Useful for situations where the SU allowlist is not kept after a reboot.

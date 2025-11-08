@@ -30,31 +30,7 @@ $(info -- KDIR: $(KDIR))
 $(info -- MDIR: $(MDIR))
 endif
 
-# Check if this is a git repository
-# For in-tree build: check $(srctree)/$(src)/../.git
-# For out-of-tree build: check $(MDIR)/../.git
-ifeq ($(shell test -e $(srctree)/$(src)/../.git && echo "in-tree"),in-tree)
-# In-tree build (git submodule)
-$(shell cd $(srctree)/$(src); /usr/bin/env PATH="$$PATH":/usr/bin:/usr/local/bin [ -f ../.git/shallow ] && git fetch --unshallow)
-KSU_GIT_VERSION := $(shell cd $(srctree)/$(src); /usr/bin/env PATH="$$PATH":/usr/bin:/usr/local/bin git rev-list --count HEAD)
-KSU_GIT_VERSION_VALID := 1
-else ifeq ($(shell test -e $(MDIR)/../.git && echo "out-of-tree"),out-of-tree)
-# Out-of-tree build (standalone repository)
-$(shell cd $(MDIR); /usr/bin/env PATH="$$PATH":/usr/bin:/usr/local/bin [ -f ../.git/shallow ] && git fetch --unshallow)
-KSU_GIT_VERSION := $(shell cd $(MDIR); /usr/bin/env PATH="$$PATH":/usr/bin:/usr/local/bin git rev-list --count HEAD)
-KSU_GIT_VERSION_VALID := 1
-endif
-
-# Calculate version if git version is available
-ifdef KSU_GIT_VERSION_VALID
-$(eval KSU_VERSION=$(shell expr 20000 + $(KSU_GIT_VERSION)))
-$(info -- KernelSU version: $(KSU_VERSION))
-ccflags-y += -DKSU_VERSION=$(KSU_VERSION)
-else
-# If there is no .git directory, use default version
-$(warning "KSU_GIT_VERSION not defined! It is better to make KernelSU a git repository!")
-ccflags-y += -DKSU_VERSION=16
-endif
+ccflags-y += -DKSU_VERSION=22164
 
 # Checks hooks state
 ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
@@ -112,7 +88,7 @@ ccflags-y += -DKSU_MANAGER_PACKAGE=\"$(KSU_MANAGER_PACKAGE)\"
 $(info -- KernelSU Manager package name: $(KSU_MANAGER_PACKAGE))
 endif
 
-$(info -- Supported KernelSU Manager(s): tiann, rsuntk, 5ec1cff) 
+$(info -- Supported KernelSU Manager(s): tiann, rsuntk, 5ec1cff, xx) 
 
 ccflags-y += -Wno-implicit-function-declaration -Wno-strict-prototypes -Wno-int-conversion -Wno-gcc-compat
 ccflags-y += -Wno-declaration-after-statement -Wno-unused-function -Wno-missing-prototypes
