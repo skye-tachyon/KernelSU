@@ -329,7 +329,7 @@ static int do_set_feature(void __user *arg)
 	return 0;
 }
 
-static int __do_get_wrapper_fd(const char *anon_name)
+static int __do_get_wrapper_fd(void __user *arg, const char *anon_name)
 {
 	if (!ksu_file_sid) {
 		return -1;
@@ -398,12 +398,12 @@ put_orig_file:
 
 static int do_get_wrapper_fd(void __user *arg)
 {
-	return __do_get_wrapper_fd("[mksu_fdwrapper]");
+	return __do_get_wrapper_fd(arg, "[mksu_fdwrapper]");
 }
 
 static int do_proxy_file(void __user *arg)
 {
-	return __do_get_wrapper_fd("[ksu_file_proxy]");
+	return __do_get_wrapper_fd(arg, "[ksu_file_proxy]");
 }
 
 // IOCTL handlers mapping table
