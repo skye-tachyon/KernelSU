@@ -2,7 +2,7 @@ name: Build Manager (main)
 
 on:
   push:
-    branches: [ "main", "ci" ]
+    branches: [ "main", "ci", "rksu-not" ]
     paths:
       - '.github/workflows/build-manager.yml'
       - '.github/workflows/build-manager-common.yml'
