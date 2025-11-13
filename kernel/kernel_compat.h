@@ -276,4 +276,24 @@ static inline u64 ksu_ktime_get_ns(void) { return ktime_to_ns(ktime_get()); }
 
 static inline void ksu_kfree_byref(void *buf) { kfree(*(void **)buf); }
 
+/**
+ *  kver agnostic workaround for < 3.14's CONFIG_UIDGID_STRICT_TYPE_CHECKS=n
+ *
+ *  - force dereferences an unsigned int (uid_t)
+ *  - redefines current_uid / current_euid macros
+ *
+ * ref
+ *  - https://elixir.bootlin.com/linux/v3.13/source/include/linux/uidgid.h
+ *  - https://elixir.bootlin.com/linux/v3.13/source/include/linux/cred.h#L331
+ */
+#define ksu_get_uid_t(x) *(unsigned int *)&(x)
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION (3, 14, 0)
+#undef current_uid
+#undef current_euid
+typedef struct { uid_t val; } ksu_kuid_t;
+static inline ksu_kuid_t current_uid() { return *(ksu_kuid_t *)(&current_cred()->uid); }
+static inline ksu_kuid_t current_euid() { return *(ksu_kuid_t *)(&current_cred()->euid); }
+#endif // < 3.14
+
 #endif
