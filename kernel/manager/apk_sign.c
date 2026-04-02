@@ -387,5 +387,6 @@ bool is_manager_apk(char *path)
 	|| check_v2_signature(path, 0x384, "a9462b8b98ea1ca7901b0cbdcebfaa35f0aa95e51b01d66e6b6d2c81b97746d8")  // MamboSU
 //	|| check_v2_signature(path, 0x3e6, "79e590113c4c4c0c222978e413a5faa801666957b1212a328e46c00c69821bf7")  // rifsxd/KernelSU-Next, temp remove, reason: old selinux domain
 	|| check_v2_signature(path, 0x396, "f415f4ed9435427e1fdf7f1fccd4dbc07b3d6b8751e4dbcec6f19671f427870b")  // rsuntk/KernelSU
+	|| check_v2_signature(path, 0x381, "52d52d8c8bfbe53dc2b6ff1c613184e2c03013e090fe8905d8e3d5dc2658c2e4") // WildKernels/Wild_KSU
 	);
 }
