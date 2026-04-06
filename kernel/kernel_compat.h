@@ -272,13 +272,8 @@ static inline u64 ksu_ktime_get_ns(void) { return ktime_to_ns(ktime_get()); }
 #endif
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION (4, 9, 0)
-static inline __s64 ksu_sign_extend64(__u64 value, int index)
-{
-	__u8 shift = 63 - index;
-	return (__s64)(value << shift) >> shift;
-}
-#define untagged_addr(addr) ksu_sign_extend64(addr, 55)
+#ifndef untagged_addr
+#define untagged_addr(addr) (addr)
 #endif
 
 static inline void ksu_kfree_byref(void *buf) { kfree(*(void **)buf); }
