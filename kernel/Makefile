@@ -54,7 +54,7 @@ endif
 # UL, look for read_iter on f_op struct
 ifeq ($(shell grep -q "read_iter" $(srctree)/include/linux/fs.h 2>/dev/null; echo $$?),0)
 $(info -- KernelSU/compat: f_op->read_iter found!)
-CFLAGS_ksu.o += -DKSU_HAS_FOP_READ_ITER
+#CFLAGS_ksu.o += -DKSU_HAS_FOP_READ_ITER
 endif
 
 # UL, look for iterate_dir on ‎fs/readdir.c
