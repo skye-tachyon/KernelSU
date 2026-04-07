@@ -66,7 +66,6 @@ import me.weishu.kernelsu.ui.component.dialog.rememberConfirmDialog
 import me.weishu.kernelsu.ui.component.material.TonalCard
 import me.weishu.kernelsu.ui.component.rebootlistpopup.RebootListPopup
 import me.weishu.kernelsu.ui.component.statustag.StatusTag
-import me.weishu.kernelsu.ui.theme.LocalEnableOfficialLauncher
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -434,7 +433,6 @@ private fun DonateCard(onOpenUrl: (String) -> Unit) {
 
 @Composable
 private fun InfoCard(systemInfo: SystemInfo) {
-    val isOfficial = LocalEnableOfficialLauncher.current
 
     TonalCard {
         Column(
@@ -488,7 +486,7 @@ private fun InfoCard(systemInfo: SystemInfo) {
             InfoCardItem(
                 icon = {
                     Icon(
-                        painter = painterResource(if (isOfficial) R.drawable.ic_launcher_foreground else R.drawable.ic_launcher_kowsu),
+                        painter = painterResource(R.drawable.ic_launcher_foreground),
                         contentDescription = null,
                         modifier = Modifier.size(20.dp).wrapContentSize(unbounded = true).requiredSize(48.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
