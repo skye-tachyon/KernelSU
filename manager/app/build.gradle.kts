@@ -119,6 +119,7 @@ android {
         targetSdk = androidTargetSdkVersion
         versionCode = managerVersionCode
         versionName = managerVersionName
+        applicationId = "who.is.skye.kernalsu"
 
         buildConfigField("boolean", "IS_PR_BUILD", isPrBuild.toString())
 
