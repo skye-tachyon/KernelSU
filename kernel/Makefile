@@ -14,6 +14,8 @@ $(info -- MDIR: $(MDIR))
 # compliant to last upstream kernel change as of 1230409
 CFLAGS_ksu.o += -DKSU_VERSION=32472
 
+CFLAGS_ksu.o += -DKSU_VERSION=$(shell echo $$(($(KSU_VERSION) + 1000)))
+
 ifndef KSU_EXPECTED_SIZE
 KSU_EXPECTED_SIZE := 0x033b
 endif
