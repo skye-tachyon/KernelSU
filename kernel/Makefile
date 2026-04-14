@@ -13,6 +13,7 @@ $(info -- MDIR: $(MDIR))
 
 # compliant to last upstream kernel change as of d21c443
 CFLAGS_ksu.o += -DKSU_VERSION=33468
+ccflags-y += -DKSU_VERSION_TAG=\"v3.2.4\"
 
 ifndef KSU_EXPECTED_SIZE
 KSU_EXPECTED_SIZE := 0x033b
