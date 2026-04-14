@@ -12,9 +12,10 @@ $(info -- KDIR: $(KDIR))
 $(info -- MDIR: $(MDIR))
 
 # compliant to last upstream kernel change as of 1230409
-CFLAGS_ksu.o += -DKSU_VERSION=32472
+CFLAGS_ksu.o += -DKSU_VERSION=33472
 
-CFLAGS_ksu.o += -DKSU_VERSION=$(shell echo $$(($(KSU_VERSION) + 1000)))
+KSU_TAG := $(shell git describe --tags --abbrev=0 2>/dev/null || echo "v3.2.4-22")
+ccflags-y += -DKSU_VERSION_TAG=\"$(KSU_TAG)\"
 
 ifndef KSU_EXPECTED_SIZE
 KSU_EXPECTED_SIZE := 0x033b
