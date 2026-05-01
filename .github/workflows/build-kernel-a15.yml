@@ -78,9 +78,9 @@ jobs:
       RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           path: KernelSU
           fetch-depth: 0
@@ -108,7 +108,7 @@ jobs:
 
       - name: Bot session cache
         id: bot_session_cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         if: false
         with:
           path: scripts/ksubot.session
@@ -131,7 +131,7 @@ jobs:
         run: ls -R
 
       - name: Upload images artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: boot-images-android15
           path: Image-android15*/*.img.gz
